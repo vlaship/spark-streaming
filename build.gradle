@@ -1,0 +1,60 @@
+plugins {
+    id 'scala'
+	id 'idea'
+}
+
+group 'vlaship.spark'
+version '0.1'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    mainClassFile = "vlaship.spark.streaming.App"
+    //*/
+    sparkVersion = "2.11:2.2.0"
+    scalaVersion = "2.11.12"
+    /*/
+    sparkVersion = "2.12:2.4.4"
+    scalaVersion = "2.13.0"
+    //*/
+}
+
+dependencies {
+    implementation "org.scala-lang:scala-library:$scalaVersion"
+    implementation "org.scala-lang:scala-reflect:$scalaVersion"
+    implementation "org.scala-lang:scala-compiler:$scalaVersion"
+
+    implementation "org.apache.spark:spark-streaming_$sparkVersion"
+}
+
+task run(type: JavaExec, dependsOn: classes) {
+    main = mainClassFile
+    classpath sourceSets.main.runtimeClasspath
+    classpath configurations.runtime
+}
+
+jar {
+    manifest { attributes 'Main-Class': mainClassFile }
+    include { sourceSets.main.output.classesDir }
+    zip64 true
+}
+
+configurations {
+    provided
+}
+
+sourceSets {
+    main {
+        compileClasspath += configurations.provided
+    }
+}
+
+idea {
+    module {
+        scopes.PROVIDED.plus += [configurations.provided]
+    }
+}
